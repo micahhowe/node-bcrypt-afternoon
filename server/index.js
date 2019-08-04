@@ -4,6 +4,7 @@ const session = require('express-session')
 const massive = require('massive')
 const PORT = 4000
 const {CONNECTION_STRING, SESSION_SECRET} = process.env
+const authCtrl = require('./controllers/authController')
 
 const app = express()
 
@@ -16,6 +17,10 @@ app.use(session({
       maxAge: 1000 * 60 * 60 * 24 * 7
     }
   }))
+
+  //Endpoints
+  app.post('/auth/register', authCtrl.register) // register
+  
 
 massive(CONNECTION_STRING).then(db => {
     app.set('db', db)
