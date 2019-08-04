@@ -20,5 +20,20 @@ module.exports = {
         //here we will set req.session.user to an object with properties isAdmin, id, and username, equal to user.is_admin, user.id, and user.username.
         req.session.user = {id: user.cust_id, username: user.username, isAdmin: user.is_admin}
         res.status(201).send(req.session.user)
-    }
+    },
+
+    login: async (req, res) => {
+        const { username, password } = req.body;
+        const foundUser = await req.app.get('db').get_user([username]);
+        const user = foundUser[0];
+        if (!user) {
+          return res.status(401).send('User  not found. Please register as a new user before logging in.');
+        }
+        const isAuthenticated = bcrypt.compareSync(password, user.hash);
+        if (!isAuthenticated) {
+          return res.status(403).send('Incorrect password');
+        }
+        req.session.user = { isAdmin: user.is_admin, id: user.id, username: user.username };
+        return res.send(req.session.user);
+      },
 }
